@@ -1,2 +1,2 @@
-// Update the API URL to point to the correct port
-export const API_URL = 'http://localhost:5003';
+export const API_URL = 'https://fullstack-bu33.onrender.com'
+
