@@ -32,7 +32,7 @@ const Header = () => {
             {isAuthenticated ? (
               <>
                 <Nav.Link as={Link} to="/notifications">
-                  Notifications <Badge bg="danger">0</Badge>
+                  Notifications <Badge bg="danger"></Badge>
                 </Nav.Link>
                 <NavDropdown title={user?.name || 'User'} id="basic-nav-dropdown">
                   <NavDropdown.Item as={Link} to="/profile">Profile</NavDropdown.Item>

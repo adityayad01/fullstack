@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Form, Button, Card, Alert, Row, Col } from 'react-bootstrap';
+import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL } from '../../utils/constants';
@@ -14,7 +14,8 @@ const AddClaim = () => {
   const [item, setItem] = useState(null);
   const [formData, setFormData] = useState({
     description: '',
-    contactPreference: 'email'
+    contactPreference: 'email',
+    contactDetails: ''
   });
   
   const [proofImages, setProofImages] = useState([]);
@@ -67,6 +68,10 @@ const AddClaim = () => {
     if (!formData.description) {
       return setError('Please provide a description of your claim');
     }
+
+    if (!formData.contactDetails) {
+      return setError('Please provide your contact details');
+    }
     
     if (proofImages.length === 0) {
       return setError('Please upload at least one proof image');
@@ -76,20 +81,17 @@ const AddClaim = () => {
       setLoading(true);
       setError('');
       
-      // Create form data for file upload
       const claimFormData = new FormData();
-      
-      // Add text fields
       claimFormData.append('description', formData.description);
       claimFormData.append('contactPreference', formData.contactPreference);
+      claimFormData.append('contactDetails', formData.contactDetails);
       
-      // Add proof images
       proofImages.forEach(image => {
         claimFormData.append('proofImages', image);
       });
       
-      const res = await axios.post(`${API_URL}/api/claims`, {
-        item: id,
+      await axios.post(`${API_URL}/api/claims`, {
+        itemId: id,
         ...formData
       });
       
@@ -150,7 +152,7 @@ const AddClaim = () => {
                   required
                 />
               </Form.Group>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Proof Images</Form.Label>
                 <Form.Control
@@ -164,7 +166,7 @@ const AddClaim = () => {
                   Upload images that prove your ownership (e.g., photos of you with the item, receipts, etc.)
                 </Form.Text>
               </Form.Group>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Preferred Contact Method</Form.Label>
                 <Form.Select
@@ -175,6 +177,18 @@ const AddClaim = () => {
                   <option value="email">Email</option>
                   <option value="phone">Phone</option>
                 </Form.Select>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Contact Details</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="contactDetails"
+                  value={formData.contactDetails}
+                  onChange={handleChange}
+                  placeholder="Enter your contact email or phone"
+                  required
+                />
               </Form.Group>
               
               <div className="d-grid gap-2 mt-4">

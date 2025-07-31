@@ -25,6 +25,7 @@ import MyItems from './components/items/MyItems';
 
 // Claim Components
 import Claims from './components/claims/Claims';
+
 import ClaimDetail from './components/claims/ClaimDetail';
 import AddClaim from './components/claims/AddClaim';
 
@@ -62,11 +63,10 @@ function App() {
                 <Route path="/items/add" element={<PrivateRoute><AddItem /></PrivateRoute>} />
                 <Route path="/items/edit/:id" element={<PrivateRoute><EditItem /></PrivateRoute>} />
                 <Route path="/my-items" element={<PrivateRoute><MyItems /></PrivateRoute>} />
-                <Route path="/claims" element={<PrivateRoute><Claims /></PrivateRoute>} />
-                <Route path="/claims/:id" element={<PrivateRoute><ClaimDetail /></PrivateRoute>} />
+                <Route path="/claims" element={<PrivateRoute><Claims /></PrivateRoute>} />                <Route path="/claims/:id" element={<PrivateRoute><ClaimDetail /></PrivateRoute>} />
                 <Route path="/items/:id/claim" element={<PrivateRoute><AddClaim /></PrivateRoute>} />
                 <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
-                
+
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminRoute><Dashboard /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />

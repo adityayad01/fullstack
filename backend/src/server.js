@@ -18,6 +18,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const itemRoutes = require('./routes/items');
 const claimRoutes = require('./routes/claims');
+const notificationRoutes = require('./routes/notifications')
 
 // Initialize express app
 const app = express();
@@ -66,6 +67,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/claims', claimRoutes);
+app.use('/api/notifications', notificationRoutes)
 
 // Error handler middleware
 app.use(errorHandler);

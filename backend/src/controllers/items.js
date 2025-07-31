@@ -14,7 +14,7 @@ exports.getItems = async (req, res, next) => {
     const reqQuery = { ...req.query };
 
     // Fields to exclude
-    const removeFields = ['select', 'sort', 'page', 'limit', 'search', 'radius', 'lat', 'lng'];
+    const removeFields = ['select', 'sort', 'page', 'limit', 'search'];
 
     // Loop over removeFields and delete them from reqQuery
     removeFields.forEach(param => delete reqQuery[param]);
@@ -31,19 +31,6 @@ exports.getItems = async (req, res, next) => {
     // Search functionality
     if (req.query.search) {
       query = query.find({ $text: { $search: req.query.search } });
-    }
-
-    // Location search
-    if (req.query.lat && req.query.lng && req.query.radius) {
-      const lat = parseFloat(req.query.lat);
-      const lng = parseFloat(req.query.lng);
-      const radius = parseFloat(req.query.radius) / 6378; // Convert radius from km to radians
-
-      query = query.find({
-        location: {
-          $geoWithin: { $centerSphere: [[lng, lat], radius] }
-        }
-      });
     }
 
     // Select Fields
@@ -252,47 +239,49 @@ exports.getUserItems = async (req, res, next) => {
   }
 };
 
-// Helper function to find potential matches
+// Helper function to find potential matches - Fixed to work with your model
 const findMatches = async (newItem) => {
   try {
-    // Find potential matches based on category and location
+    // Find potential matches based on category and city
     const oppositeType = newItem.type === 'lost' ? 'found' : 'lost';
     
-    const potentialMatches = await Item.find({
+    // Build query conditions
+    const matchQuery = {
       type: oppositeType,
       category: newItem.category,
-      status: 'open',
-      location: {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: newItem.location.coordinates
-          },
-          $maxDistance: 5000 // 5km radius
-        }
-      }
-    }).populate('user');
+      status: 'open'
+    };
 
-    // Create notifications for potential matches
-    for (const match of potentialMatches) {
-      // Create notification for the owner of the new item
+    // Add city matching if location.city exists
+    if (newItem.location && newItem.location.city) {
+      matchQuery['location.city'] = newItem.location.city;
+    }
+
+    // Simple search: same category + same city (if available) + opposite type
+    const matches = await Item.find(matchQuery).populate('user');
+
+    // Create notifications for each match
+    for (const match of matches) {
+      // Notify owner of new item
       await Notification.create({
         user: newItem.user,
-        title: `Potential ${oppositeType} item match`,
-        message: `We found a potential match for your ${newItem.type} item "${newItem.title}"`,
+        title: 'Potential Match Found!',
+        message: `Found a ${oppositeType} ${newItem.category}${newItem.location && newItem.location.city ? ` in ${newItem.location.city}` : ''}`,
         type: 'match',
         relatedItem: match._id
       });
 
-      // Create notification for the owner of the matched item
+      // Notify owner of matched item
       await Notification.create({
         user: match.user._id,
-        title: `Potential ${newItem.type} item match`,
-        message: `We found a potential match for your ${match.type} item "${match.title}"`,
+        title: 'Potential Match Found!',
+        message: `Someone ${newItem.type} a ${newItem.category}${newItem.location && newItem.location.city ? ` in ${newItem.location.city}` : ''}`,
         type: 'match',
         relatedItem: newItem._id
       });
     }
+    
+    console.log(`Found ${matches.length} potential matches`);
   } catch (error) {
     console.error('Error finding matches:', error);
   }

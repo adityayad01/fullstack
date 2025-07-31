@@ -18,11 +18,18 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_URL}/api/notifications`);
+      const token = localStorage.getItem('token');
+
+      const res = await axios.get(`${API_URL}/api/notifications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setNotifications(res.data.data);
     } catch (err) {
       setError('Error fetching notifications');
-      console.error(err);
+      console.error('Fetch error:', err?.response?.data || err.message);
     } finally {
       setLoading(false);
     }
@@ -30,7 +37,15 @@ const Notifications = () => {
   
   const markAsRead = async (id) => {
     try {
-      await axios.put(`${API_URL}/api/notifications/${id}`);
+      const token = localStorage.getItem('token');
+      
+      // Updated to match backend route: /:id/read
+      await axios.put(`${API_URL}/api/notifications/${id}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
       setNotifications(notifications.map(notification => 
         notification._id === id ? { ...notification, read: true } : notification
       ));
@@ -43,7 +58,22 @@ const Notifications = () => {
   
   const markAllAsRead = async () => {
     try {
-      await axios.put(`${API_URL}/api/notifications/read-all`);
+      const token = localStorage.getItem('token');
+      
+      // Since there's no mark-all-as-read endpoint in backend, we'll mark each unread notification individually
+      const unreadNotifications = notifications.filter(notification => !notification.read);
+      
+      // Mark each unread notification as read
+      const promises = unreadNotifications.map(notification => 
+        axios.put(`${API_URL}/api/notifications/${notification._id}/read-all`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      );
+      
+      await Promise.all(promises);
+      
       setNotifications(notifications.map(notification => ({ ...notification, read: true })));
       toast.success('All notifications marked as read');
     } catch (err) {
@@ -54,7 +84,14 @@ const Notifications = () => {
   
   const deleteNotification = async (id) => {
     try {
-      await axios.delete(`${API_URL}/api/notifications/${id}`);
+      const token = localStorage.getItem('token');
+      
+      await axios.delete(`${API_URL}/api/notifications/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
       setNotifications(notifications.filter(notification => notification._id !== id));
       toast.success('Notification deleted');
     } catch (err) {
@@ -81,7 +118,8 @@ const Notifications = () => {
   };
   
   const getNotificationLink = (notification) => {
-    if (notification.type === 'item_match') {
+    // Updated to match the backend notification types
+    if (notification.type === 'match') {
       return `/items/${notification.relatedItem}`;
     } else if (notification.type === 'claim_update') {
       return `/claims/${notification.relatedClaim}`;
@@ -123,7 +161,7 @@ const Notifications = () => {
             </Badge>
           )}
         </h1>
-        {notifications.length > 0 && (
+        {notifications.length > 0 && unreadCount > 0 && (
           <Button variant="outline-primary" onClick={markAllAsRead}>
             Mark All as Read
           </Button>

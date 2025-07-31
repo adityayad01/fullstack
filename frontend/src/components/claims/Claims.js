@@ -26,6 +26,25 @@ const Claims = () => {
       setLoading(false);
     }
   };
+
+  const deleteClaim = async (claimId) => {
+  if (!window.confirm('Are you sure you want to delete this claim?')) return;
+
+  try {
+    await axios.delete(`${API_URL}/api/claims/${claimId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`, // ✅ Add this
+      },
+    });
+
+    toast.success('Claim deleted successfully');
+    setClaims(claims.filter((claim) => claim._id !== claimId));
+  } catch (error) {
+    toast.error(error.response?.data?.error || 'Failed to delete claim');
+    console.error(error);
+  }
+};
+
   
   const getStatusBadge = (status) => {
     switch (status) {
@@ -104,12 +123,15 @@ const Claims = () => {
                   )}
                   
                   <div className="d-flex justify-content-between">
-                    <Link to={`/claims/${claim._id}`} className="btn btn-primary">
-                      View Details
-                    </Link>
                     <Link to={`/items/${claim.item._id}`} className="btn btn-outline-secondary">
                       View Item
                     </Link>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => deleteClaim(claim._id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </Card.Body>
               </Card>

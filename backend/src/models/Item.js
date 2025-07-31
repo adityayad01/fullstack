@@ -46,8 +46,8 @@ const ItemSchema = new mongoose.Schema({
       default: 'Point'
     },
     coordinates: {
-      type: [Number],
-      index: '2dsphere'
+      type: [Number]
+      // Removed the problematic index: '2dsphere'
     },
     formattedAddress: String,
     city: String,
