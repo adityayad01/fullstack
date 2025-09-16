@@ -191,7 +191,7 @@ const Notifications = () => {
                     <Link to={getNotificationLink(notification)} className="text-decoration-none">
                       <div className="fw-bold">{notification.title}</div>
                     </Link>
-                    <p className="mb-0">{notification.message}</p>
+                    <p className="mb-0" dangerouslySetInnerHTML={{ __html: notification.message }}></p>
                     <small className="text-muted">{formatDate(notification.createdAt)}</small>
                   </div>
                 </div>

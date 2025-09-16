@@ -32,7 +32,7 @@ const ItemManagement = () => {
       if (filters.status) queryParams.append('status', filters.status);
       if (filters.search) queryParams.append('search', filters.search);
       
-      const res = await axios.get(`${API_URL}/api/admin/items?${queryParams.toString()}`);
+      const res = await axios.get(`${API_URL}/api/items?${queryParams.toString()}`);
       setItems(res.data.data);
     } catch (err) {
       setError('Error fetching items');
@@ -52,7 +52,7 @@ const ItemManagement = () => {
   
   const handleStatusChange = async (itemId, newStatus) => {
     try {
-      await axios.put(`${API_URL}/api/admin/items/${itemId}/status`, {
+      await axios.put(`${API_URL}/api/items/${itemId}/status`, {
         status: newStatus
       });
       
@@ -71,7 +71,7 @@ const ItemManagement = () => {
   const handleDelete = async (itemId) => {
     if (window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
       try {
-        await axios.delete(`${API_URL}/api/admin/items/${itemId}`);
+        await axios.delete(`${API_URL}/api/items/${itemId}`);
         
         // Remove item from the list
         setItems(items.filter(item => item._id !== itemId));

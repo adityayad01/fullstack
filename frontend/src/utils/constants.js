@@ -1,2 +1,2 @@
-export const API_URL = 'https://fullstack-bu33.onrender.com'
+export const API_URL = 'http://localhost:5003';
 

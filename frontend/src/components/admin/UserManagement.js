@@ -26,7 +26,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_URL}/api/admin/users`);
+      const res = await axios.get(`${API_URL}/api/users`);
       setUsers(res.data.data);
     } catch (err) {
       setError('Error fetching users');
@@ -65,7 +65,7 @@ const UserManagement = () => {
     e.preventDefault();
     
     try {
-      await axios.put(`${API_URL}/api/admin/users/${selectedUser._id}`, formData);
+      await axios.put(`${API_URL}/api/users/${selectedUser._id}`, formData);
       
       // Update user in the list
       setUsers(users.map(user => 
@@ -84,7 +84,7 @@ const UserManagement = () => {
     try {
       const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
       
-      await axios.put(`${API_URL}/api/admin/users/${userId}/status`, {
+      await axios.put(`${API_URL}/api/users/${userId}/status`, {
         status: newStatus
       });
       

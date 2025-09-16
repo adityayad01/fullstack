@@ -32,7 +32,7 @@ const ClaimManagement = () => {
       if (filters.status) queryParams.append('status', filters.status);
       if (filters.search) queryParams.append('search', filters.search);
       
-      const res = await axios.get(`${API_URL}/api/admin/claims?${queryParams.toString()}`);
+      const res = await axios.get(`${API_URL}/api/claims?${queryParams.toString()}`);
       setClaims(res.data.data);
     } catch (err) {
       setError('Error fetching claims');
@@ -61,38 +61,35 @@ const ClaimManagement = () => {
     setSelectedClaim(null);
   };
   
-  const handleStatusChange = async (claimId, newStatus) => {
-    try {
-      if (newStatus === 'rejected' && !rejectionReason) {
-        return toast.error('Please provide a reason for rejection');
-      }
-      
-      await axios.put(`${API_URL}/api/admin/claims/${claimId}/status`, {
-        status: newStatus,
-        rejectionReason: newStatus === 'rejected' ? rejectionReason : undefined
-      });
-      
-      // Update claim in the list
-      setClaims(claims.map(claim => 
-        claim._id === claimId ? { 
-          ...claim, 
-          status: newStatus,
-          rejectionReason: newStatus === 'rejected' ? rejectionReason : claim.rejectionReason
-        } : claim
-      ));
-      
-      toast.success('Claim status updated successfully');
-      handleCloseModal();
-    } catch (err) {
-      toast.error('Error updating claim status');
-      console.error(err);
-    }
-  };
+ const handleStatusChange = async (claimId, newStatus) => {
+    try {
+      if (newStatus === 'rejected' && !rejectionReason) {
+        return toast.error('Please provide a reason for rejection');
+      }
+      
+      // Send the request to your backend to change the claim's status
+      await axios.put(`${API_URL}/api/claims/${claimId}/status`, {
+        status: newStatus,
+        rejectionReason: newStatus === 'rejected' ? rejectionReason : undefined
+      });
+      
+      // If the status change is successful, refetch all claims to get the most
+      // current data, including the updated item status. This is more reliable
+      // than manually manipulating the state.
+      fetchClaims(); // ⬅️ Call the function to re-fetch all claims
+      
+      toast.success('Claim status updated successfully');
+      handleCloseModal();
+    } catch (err) {
+      toast.error('Error updating claim status');
+      console.error(err);
+    }
+  };
   
   const handleDelete = async (claimId) => {
     if (window.confirm('Are you sure you want to delete this claim? This action cannot be undone.')) {
       try {
-        await axios.delete(`${API_URL}/api/admin/claims/${claimId}`);
+        await axios.delete(`${API_URL}/api/claims/${claimId}`);
         
         // Remove claim from the list
         setClaims(claims.filter(claim => claim._id !== claimId));

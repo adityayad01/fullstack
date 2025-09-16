@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect,authorize } = require('../middleware/auth');
 const {
   createClaim,
   getClaims,
   getClaim,
   updateClaim,
-  deleteClaim
+  deleteClaim,
+  updateClaimStatus 
 } = require('../controllers/claims');
 
 // Test route (no auth)
@@ -24,5 +25,6 @@ router.get('/', protect, getClaims);
 router.get('/:id', protect, getClaim);
 router.put('/:id', protect, updateClaim);
 router.delete('/:id', protect, deleteClaim);
+router.route('/:id/status').put(protect, authorize('admin'), updateClaimStatus);
 
 module.exports = router;
