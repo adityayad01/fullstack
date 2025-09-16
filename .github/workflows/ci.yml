@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - test # <--- Add this line!
 
 jobs:
   trigger_jenkins:
